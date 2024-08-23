@@ -3,6 +3,7 @@ import re
 import sqlite3
 import subprocess
 from androguard.core.apk import APK  # Correct import for APK handling
+import struct
 
 # Path to ADB executable
 adb_path = "adb"
@@ -37,10 +38,16 @@ def run_adb_command(command):
     return result.stdout.strip()
 
 def get_app_name_from_apk(apk_path):
-    # Use APK class from androguard to parse the APK and extract the application name
-    apk = APK(apk_path)
-    app_name = apk.get_app_name()
-    return app_name
+    try:
+        apk = APK(apk_path)
+        app_name = apk.get_app_name()
+        return app_name
+    except (struct.error, KeyError) as e:
+        print(f"Error parsing APK {apk_path}: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error while parsing APK {apk_path}: {e}")
+        return None
 
 def sanitize_filename(name):
     # Replace invalid characters for filenames in Windows
